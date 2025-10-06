@@ -25,5 +25,6 @@ func (r *TelemetryRepo) SaveSensorData(clientID, username, topic string, payload
          VALUES ($1,$2,$3,$4,$5)`,
         clientID, username, topic, jsonPayload, timestamp,
     )
+	
     return err
 }
