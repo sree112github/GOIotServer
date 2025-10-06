@@ -1,0 +1,24 @@
+# Air config file
+ # Docs: https://github.com/air-verse/air
+
+ # Root directory of your project
+ root = "."
+ tmp_dir = "tmp"
+
+ [build]
+   cmd = "go build -o ./tmp/main.exe ./cmd/server"
+   bin = "tmp/main.exe"
+   include_ext = ["go", "tpl", "tmpl", "html"]
+   exclude_dir = ["vendor", "tmp", "node_modules"]
+
+ [log]
+   time = true
+
+ [color]
+   main = "yellow"
+   watcher = "cyan"
+   build = "green"
+   runner = "magenta"
+
+ [misc]
+   clean_on_exit = true
