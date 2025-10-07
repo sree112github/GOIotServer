@@ -148,7 +148,7 @@ func (x *SensorPayload) GetTimestamp() int64 {
 
 var File_internal_proto_aq_sensor_proto protoreflect.FileDescriptor
 
-const file_internal_proto_aq_sensor_proto_rawDesc = "" +
+const File_internal_proto_aq_sensor_proto_rawDesc = "" +
 	"\n" +
 	"\x1einternal/proto/aq/sensor.proto\x12\x02aq\"\xa9\x02\n" +
 	"\rSensorPayload\x12\x17\n" +
@@ -172,7 +172,7 @@ var (
 
 func file_internal_proto_aq_sensor_proto_rawDescGZIP() []byte {
 	file_internal_proto_aq_sensor_proto_rawDescOnce.Do(func() {
-		file_internal_proto_aq_sensor_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_internal_proto_aq_sensor_proto_rawDesc), len(file_internal_proto_aq_sensor_proto_rawDesc)))
+		file_internal_proto_aq_sensor_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(File_internal_proto_aq_sensor_proto_rawDesc), len(File_internal_proto_aq_sensor_proto_rawDesc)))
 	})
 	return file_internal_proto_aq_sensor_proto_rawDescData
 }
@@ -198,7 +198,7 @@ func file_internal_proto_aq_sensor_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_proto_aq_sensor_proto_rawDesc), len(file_internal_proto_aq_sensor_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(File_internal_proto_aq_sensor_proto_rawDesc), len(File_internal_proto_aq_sensor_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
