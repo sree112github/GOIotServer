@@ -12,7 +12,7 @@ import (
 
 func InsertSensorPayloadDescriptor(db *sql.DB) {
 	// Convert raw descriptor string to bytes
-	descBytes := []byte(aq.File_internal_proto_aq_sensor_proto_rawDesc)
+	descBytes := []byte(aq.File_internal_proto_aq_alert_proto_rawDesc)
 
 	// Optional: unmarshal to FileDescriptorProto to validate
 	var fileDescProto descriptorpb.FileDescriptorProto
@@ -25,7 +25,7 @@ func InsertSensorPayloadDescriptor(db *sql.DB) {
 		INSERT INTO proto_descriptors (proto_name, descriptor)
 		VALUES ($1, $2)
 		ON CONFLICT (proto_name) DO UPDATE SET descriptor = EXCLUDED.descriptor
-	`, "SensorPayload", descBytes)
+	`, "AlertPayload", descBytes)
 	if err != nil {
 		log.Fatalf("Failed to insert descriptor into DB: %v", err)
 	}

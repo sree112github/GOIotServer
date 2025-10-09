@@ -1,0 +1,14 @@
+
+syntax = "proto3";
+package aq;
+
+option go_package = "IotProto/internal/proto/aq;aq";
+
+
+// ---------- ALERT PAYLOAD ----------
+message AlertPayload {
+  string alert_type = 1;       // e.g. "HIGH_CO2", "LOW_TEMP"
+  string description = 2;      // human-readable text
+  int64 timestamp = 3;         // Unix timestamp (ms)
+  int32 severity = 4;          // e.g. 1=low, 2=medium, 3=critical
+}

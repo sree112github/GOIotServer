@@ -1,0 +1,9 @@
+syntax = "proto3"; 
+package aq; 
+option go_package = "IotProto/internal/proto/aq;aq";
+
+ message CommonWrapper {
+     string device_id = 1 ; 
+     string schema_name = 2 ; // For storing encoded data 
+     bytes payload = 3 ;
+      }
