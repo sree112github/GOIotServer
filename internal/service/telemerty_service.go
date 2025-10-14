@@ -9,42 +9,63 @@ import (
 	"time"
 )
 
-var telemetryChan = make(chan model.TelemetryRecord, 1000)
+var (
+	recordsChan = make(chan model.TelemetryRecord, 1000) // buffered channel
+)
 
-// StartBatchInserter starts a goroutine that flushes in batches
+// StartBatchInserter runs in background and inserts data in batches
 func StartBatchInserter(ctx context.Context) {
-	const batchSize = 20
-	const flushInterval = 10 * time.Second
+	batchSize := 100
+	batchTimeout := 20 * time.Second // flush interval
+	insertTimeout := 5 * time.Second // DB insert timeout
 
-	ticker := time.NewTicker(flushInterval)
+	ticker := time.NewTicker(batchTimeout)
 	defer ticker.Stop()
 
-	var buffer []model.TelemetryRecord
+	var batch []model.TelemetryRecord
 
 	for {
 		select {
-		case rec := <-telemetryChan:
-			buffer = append(buffer, rec)
-			if len(buffer) >= batchSize {
-				repository.CopyBatch(ctx, buffer)
-				buffer = buffer[:0]
+		case <-ctx.Done():
+			log.Println("🛑 Batch inserter stopping...")
+			if len(batch) > 0 {
+				flushBatch(batch, insertTimeout)
+			}
+			return
+
+		case rec := <-recordsChan:
+			batch = append(batch, rec)
+			if len(batch) >= batchSize {
+				flushBatch(batch, insertTimeout)
+				batch = nil
 			}
 
 		case <-ticker.C:
-			if len(buffer) > 0 {
-				repository.CopyBatch(ctx, buffer)
-				buffer = buffer[:0]
+			if len(batch) > 0 {
+				flushBatch(batch, insertTimeout)
+				batch = nil
 			}
 		}
 	}
 }
+func flushBatch(batch []model.TelemetryRecord, insertTimeout time.Duration) {
+	ctx, cancel := context.WithTimeout(context.Background(), insertTimeout)
+	defer cancel()
 
-// EnqueueTelemetry safely sends a telemetry record into the channel
-func EnqueueTelemetry(rec model.TelemetryRecord) {
+	if err := repository.CopyBatch(ctx, batch); err != nil {
+		log.Printf("❌ Batch insert failed: %v", err)
+		return
+	}
+
+	log.Printf("✅ Batch insert success (%d records)", len(batch))
+}
+
+// EnqueueTelemetry adds telemetry data to the channel
+func EnqueueTelemetry(record model.TelemetryRecord) {
 	select {
-	case telemetryChan <- rec:
+	case recordsChan <- record:
 	default:
-		log.Println("⚠️ Telemetry channel full — dropping data!")
+		log.Println("⚠️ Queue full, dropping record")
 	}
 }
 

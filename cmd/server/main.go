@@ -15,7 +15,8 @@ func main() {
 	config.InitDB()
 	defer config.DB.Close()
 
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	go service.StartBatchInserter(ctx)
 
 	r := gin.Default()
