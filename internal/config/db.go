@@ -1,21 +1,34 @@
-package db
+package config
 
-// import (
-//     "database/sql"
-//     "log"
+import (
+	"context"
+	"log"
+	"sync"
 
-//     _ "github.com/lib/pq"
-// )
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
-// var DB *sql.DB
+var (
+	DB   *pgxpool.Pool
+	once sync.Once
+)
 
-// func Init() {
-//     var err error
-//     DB, err = sql.Open("postgres", "postgres://postgres:148115@localhost:5432/samyojak?sslmode=disable")
-//     if err != nil {
-//         log.Fatal("failed to connect to database:", err)
-//     }
-//     if err = DB.Ping(); err != nil {
-//         log.Fatal("database unreachable:", err)
-//     }
-// }
+// InitDB initializes the pgx pool
+func InitDB() {
+	once.Do(func() {
+		ctx := context.Background()
+		dsn := "postgres://postgres:148115@localhost:5432/samyojak?sslmode=disable"
+
+		var err error
+		DB, err = pgxpool.New(ctx, dsn)
+		if err != nil {
+			log.Fatalf("❌ Failed to create pgx pool: %v", err)
+		}
+
+		if err := DB.Ping(ctx); err != nil {
+			log.Fatalf("❌ DB ping failed: %v", err)
+		}
+
+		log.Println("✅ Database connected successfully (pgxpool)")
+	})
+}

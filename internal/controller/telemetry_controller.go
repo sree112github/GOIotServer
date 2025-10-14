@@ -1,60 +1,47 @@
 package controller
 
-// import (
-//     "encoding/base64"
-//     "log"
-//     "net/http"
+import (
+	"net/http"
 
-//     "github.com/gin-gonic/gin"
-//     "google.golang.org/protobuf/proto"
+	model "IotProto/internal/models"
+	"IotProto/internal/service"
+	"IotProto/internal/utils"
 
-//     "IotProto/internal/proto/aq"
-//     "IotProto/internal/repository"
-// )
+	"github.com/gin-gonic/gin"
+)
 
-// func HandleWebhook(c *gin.Context) {
-//     var msg struct {
-//         ClientID string `json:"clientid"`
-//         Username string `json:"username"`
-//         Topic    string `json:"topic"`
-//         Payload  string `json:"payload"` // base64
-//     }
+// HandleWebhook handles the incoming POST requests
+func HandleWebhook(c *gin.Context) {
+	var msg struct {
+		ClientID string `json:"clientid"`
+		Username string `json:"username"`
+		Topic    string `json:"topic"`
+		Payload  string `json:"payload"`
+	}
+	if err := c.ShouldBindJSON(&msg); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
+		return
+	}
 
-//     if err := c.ShouldBindJSON(&msg); err != nil {
-//         c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
-//         return
-//     }
+	decodedPayload, timestamp, err := utils.DecodeDynamicPayload(msg.Payload)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-//     dataBytes, err := base64.StdEncoding.DecodeString(msg.Payload)
-//     if err != nil {
-//         c.JSON(http.StatusBadRequest, gin.H{"error": "invalid base64"})
-//         return
-//     }
+	jsonPayload, err := service.MarshalPayload(decodedPayload)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "JSON marshal failed"})
+		return
+	}
 
-//     var sensor aq.SensorPayload
-//     if err := proto.Unmarshal(dataBytes, &sensor); err != nil {
-//         c.JSON(http.StatusBadRequest, gin.H{"error": "invalid protobuf"})
-//         return
-//     }
+	service.EnqueueTelemetry(model.TelemetryRecord{
+		ClientID:  msg.ClientID,
+		Username:  msg.Username,
+		Topic:     msg.Topic,
+		Payload:   jsonPayload,
+		Timestamp: timestamp,
+	})
 
-//     jsonMap := map[string]interface{}{
-//         "param_1":  sensor.Param_1,
-//         "param_2":  sensor.Param_2,
-//         "param_3":  sensor.Param_3,
-//         "param_4":  sensor.Param_4,
-//         "param_5":  sensor.Param_5,
-//         "param_6":  sensor.Param_6,
-//         "param_7":  sensor.Param_7,
-//         "param_8":  sensor.Param_8,
-//         "param_9":  sensor.Param_9,
-//         "param_10": sensor.Param_10,
-//     }
-
-//     if err := repository.SaveSensorData(msg.ClientID, msg.Username, msg.Topic, jsonMap, sensor.Timestamp); err != nil {
-//         log.Println("DB insert failed:", err)
-//         c.JSON(http.StatusInternalServerError, gin.H{"error": "DB insert failed"})
-//         return
-//     }
-
-//     c.JSON(http.StatusOK, gin.H{"status": "success"})
-// }
+	c.JSON(http.StatusOK, gin.H{"status": "queued"})
+}
