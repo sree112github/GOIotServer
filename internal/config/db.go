@@ -17,7 +17,7 @@ var (
 func InitDB() {
 	once.Do(func() {
 		ctx := context.Background()
-		dsn := "postgres://postgres:148115@localhost:5432/samyojak?sslmode=disable"
+		dsn := "postgres://postgres:6043940@localhost:5433/samyojak1?sslmode=disable"
 
 		var err error
 		DB, err = pgxpool.New(ctx, dsn)
