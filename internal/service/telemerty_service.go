@@ -10,13 +10,13 @@ import (
 )
 
 var (
-	recordsChan = make(chan model.TelemetryRecord, 1000) // buffered channel
+	recordsChan = make(chan model.TelemetryRecord, 50000) // buffered channel
 )
 
 // StartBatchInserter runs in background and inserts data in batches
 func StartBatchInserter(ctx context.Context) {
 	batchSize := 100
-	batchTimeout := 20 * time.Second // flush interval
+	batchTimeout := 10 * time.Second // flush interval
 	insertTimeout := 5 * time.Second // DB insert timeout
 
 	ticker := time.NewTicker(batchTimeout)
